@@ -64,7 +64,7 @@ create_hub_key() {
 }
 
 create_hub_conf() {
-    echo "No wghub.conf... creating one!"
+    echo "No ${SERVER_INTERFACE}.conf... creating one!"
     cat > ${WIREGUARD_DIR}/${SERVER_INTERFACE}.conf << EOF
 [Interface]
 Address = $INT_NET_HUB_IP$INT_NET_MASK
@@ -72,16 +72,16 @@ ListenPort = $EXT_NET_PORT
 PrivateKey = $(cat ${CONFIG_DIR}/wghub.key)
 SaveConfig = false
 
-PostUp = iptables -t mangle -A POSTROUTING -p tcp --tcp-flags SYN,RST SYN -o $EXT_NET_IF -j TCPMSS --clamp-mss-to-pmtu
+#PostUp = iptables -t mangle -A POSTROUTING -p tcp --tcp-flags SYN,RST SYN -o $EXT_NET_IF -j TCPMSS --clamp-mss-to-pmtu
 PostUp = iptables -t nat -A POSTROUTING -o $EXT_NET_IF -j MASQUERADE
 PostUp = iptables -A FORWARD -i %i -j ACCEPT
 
 PostDown = iptables -D FORWARD -i %i -j ACCEPT
 PostDown = iptables -t nat -D POSTROUTING -o $EXT_NET_IF -j MASQUERADE
-PostDown = iptables -t mangle -D POSTROUTING -p tcp --tcp-flags SYN,RST SYN -o $EXT_NET_IF -j TCPMSS --clamp-mss-to-pmtu
+#PostDown = iptables -t mangle -D POSTROUTING -p tcp --tcp-flags SYN,RST SYN -o $EXT_NET_IF -j TCPMSS --clamp-mss-to-pmtu
 EOF
     echo "Wireguard hub address is $EXT_NET_IP:$EXT_NET_PORT on $EXT_NET_IF."
-    echo "Note: customize [Interface] section of wghub.conf if required!"
+    echo "Note: customize [Interface] section of ${SERVER_INTERFACE}.conf if required!"
 }
 
 create_new_client_conf() {
@@ -102,7 +102,7 @@ EOF
 }
 
 add_client_to_hub_conf() {
-    printf "Updating wghub.conf..."
+    printf "Updating ${SERVER_INTERFACE}.conf..."
     cat >> ${WIREGUARD_DIR}/${SERVER_INTERFACE}.conf << EOF
 
 [Peer]
@@ -113,7 +113,7 @@ EOF
     echo " done!"
 cat << EOF
 
-Important: Deploying updated wghub.conf configuration to wireguard with wg-quick:
+Important: Deploying updated ${SERVER_INTERFACE}.conf configuration to wireguard with wg-quick:
 EOF
   
     wg-quick down ${WIREGUARD_DIR}/${SERVER_INTERFACE}.conf # if already configured
