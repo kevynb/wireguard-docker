@@ -4,7 +4,7 @@ RUN echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.li
  printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
 
 RUN apt update && \
- apt install -y --no-install-recommends wireguard-tools iptables nano net-tools && \
+ apt install -y --no-install-recommends wireguard-tools iptables nano net-tools qrencode && \
  apt clean
 
 WORKDIR /scripts
@@ -12,6 +12,7 @@ ENV PATH="/scripts:${PATH}"
 COPY install-module /scripts
 COPY run /scripts
 COPY genkeys /scripts
+COPY easy-wg-quick /scripts
 RUN chmod 755 /scripts/*
 
 CMD ["run"]
