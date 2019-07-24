@@ -24,8 +24,7 @@
 # For updates visit https://github.com/burghardt/easy-wg-quick
 
 EXT_NET_IF="$(ip route sh | grep '^default' | awk '{ print $5 }')"
-EXT_NET_IP="$(ip addr sh "$EXT_NET_IF" | grep 'inet ' | xargs | \
-        awk -F'[ /]' '{ print $2 }')"
+EXT_NET_IP=${VPN_HOST}
 EXT_NET_PORT="51820"
 INT_NET_HUB_IP="10.127.1.1"
 INT_NET_MASK="/24"
@@ -161,8 +160,21 @@ Note: passing argument to script creates symbolic link to created configuration
 EOF
 }
 
+no_server_wan_ip_error() {
+	cat << EOF
+Please define VPN_HOST environment variable. We cannot create a config without it.
+We need it to define the endpoint to which the clients will connect.	
+EOF
+	exit 1
+}
+
 main() {
     umask 077
+
+	if [ -z "$EXT_NET_IP" ]
+	then
+		no_server_wan_ip_error
+	fi
 
     CONF_LINK="$1"
 
